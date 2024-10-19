@@ -4,7 +4,6 @@ package com.douevenfeel.client;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -14,7 +13,7 @@ public class WeatherClient {
     final private HttpClient client = HttpClient.newHttpClient();
     private JSONObject weather;
 
-    public void fetchWeather(double lat, double lon, int limit) throws IOException, InterruptedException {
+    public void fetchWeather(double lat, double lon, int limit) throws Exception {
         String key = "***";
         HttpRequest request = HttpRequest
                 .newBuilder()
@@ -22,19 +21,20 @@ public class WeatherClient {
                 .header("X-Yandex-Weather-Key", key)
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            System.out.println("Произошла ошибка: " + response.statusCode());
-            return;
-        }
+        if (response.statusCode() != 200)
+            throw new Exception("Произошла ошибка при запросе данных: " + response.statusCode());
         weather = new JSONObject(response.body());
     }
 
-    public void getWeather() {
+    public void getWeather() throws Exception {
+        if (weather == null) throw new Exception("Запрос не выполнен");
         System.out.println("body: " + this.weather.toString(4));
     }
 
     public void getTemperature() throws Exception {
         try {
+            if (weather == null)
+                throw new Exception("Запрос не выполнен");
             String temperature = this.weather.getJSONObject("fact").get("temp").toString();
             System.out.println("Температура: " + temperature);
         } catch (Exception e) {
@@ -45,6 +45,8 @@ public class WeatherClient {
 
     public void getAverageTemperature() {
         try {
+            if (weather == null)
+                throw new Exception("Запрос не выполнен");
             int sum = 0;
             JSONArray forecasts = this.weather.getJSONArray("forecasts");
             int count = forecasts.length();

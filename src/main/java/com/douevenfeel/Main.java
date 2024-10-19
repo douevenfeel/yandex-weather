@@ -11,7 +11,7 @@ public class Main {
             weatherClient.getTemperature();
             weatherClient.getAverageTemperature();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 }
